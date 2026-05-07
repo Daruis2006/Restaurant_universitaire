@@ -1102,23 +1102,19 @@
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div class="modal-icon orange">🍽️</div>
     <h3>Réserver un ticket</h3>
-    <p class="subtitle">Remplis le formulaire ci-dessous. Tu paieras directement au guichet.</p>
+    <p class="subtitle">Saisis ton matricule étudiant pour réserver. Rends-toi au guichet pour le paiement.</p>
     
     <div class="meal-summary" id="mealSummary">
       <div class="meal-info">
         <strong id="summaryMeal">Déjeuner</strong><br>
-        <small id="summaryTime">12h00 - 14h00</small>
+        <small id="summaryTime">12h - 13h</small>
       </div>
       <div class="price" id="summaryPrice">150 F</div>
     </div>
 
     <div class="form-group">
-      <label>Nom complet *</label>
-      <input type="text" id="inputNom" placeholder="Ex: Adjobi Kokou Mensah" />
-    </div>
-    <div class="form-group">
       <label>Matricule étudiant *</label>
-      <input type="text" id="inputMatricule" placeholder="Ex: UNSTIM2024001" />
+      <input type="text" id="inputMatricule" placeholder="Ex: 11093STI26" />
     </div>
 
     <button class="btn-submit" onclick="confirmerReservation()">
@@ -1142,10 +1138,6 @@
 
     <div class="confirm-details">
       <div class="detail-row">
-        <span>Nom</span>
-        <span id="confirmNom">—</span>
-      </div>
-      <div class="detail-row">
         <span>Matricule</span>
         <span id="confirmMatricule">—</span>
       </div>
@@ -1164,7 +1156,7 @@
     </div>
 
     <button class="btn-submit" style="margin-top:16px; background: linear-gradient(135deg, var(--green), #1A7A4A);" onclick="closeModal()">
-      Parfait, j'ai compris !
+      Compris !
     </button>
   </div>
 </div>
@@ -1172,7 +1164,7 @@
 <!-- HEADER -->
 <header>
   <div class="header-inner">
-    <div class="logo-area">
+    <div class="logo-area" id="logoArea">
       <div class="logo-icon">🍽️</div>
       <div class="logo-text">
         <h1>RESTAURANT <span>ENS/FAST</span></h1>
@@ -1191,9 +1183,13 @@
   <div class="nav-inner">
     <button class="nav-btn active" onclick="showPage('accueil', this)">🏠 Accueil</button>
     <button class="nav-btn" onclick="showPage('infos', this)">ℹ️ Informations</button>
-    <button class="nav-btn" onclick="showPage('admin', this)">⚙️ Espace Admin</button>
+    <!-- Bouton admin masqué : accessible uniquement via le raccourci secret (voir JS) -->
+    <button class="nav-btn" id="navBtnAdmin" onclick="showPage('admin', this)" style="display:none">⚙️ Espace Admin</button>
   </div>
 </nav>
+
+<!-- Accès admin discret : cliquer 5 fois sur le logo -->
+
 
 <!-- MAIN -->
 <main>
@@ -1203,15 +1199,19 @@
     
     <div class="hero">
       <h2>Bienvenue au Restaurant Universitaire ! 🎓</h2>
-      <p>Réserve ton ticket en ligne, évite les longues files d'attente et ne rentre plus bredouille !</p>
+      <p>Réserve ton ticket en ligne. Plus pratique et plus efficace !</p>
       <div class="hero-stats">
         <div class="hero-stat">
-          <div class="num" id="totalReservations">0</div>
-          <div class="label">Réservations aujourd'hui</div>
+          <div class="num" id="heroStatMatin">—</div>
+          <div class="label">☕ Places matin</div>
         </div>
         <div class="hero-stat">
-          <div class="num" id="totalTicketsDispo">0</div>
-          <div class="label">Tickets disponibles</div>
+          <div class="num" id="heroStatMidi">—</div>
+          <div class="label">🍛 Places midi</div>
+        </div>
+        <div class="hero-stat">
+          <div class="num" id="heroStatSoir">—</div>
+          <div class="label">🌙 Places soir</div>
         </div>
       </div>
     </div>
@@ -1224,7 +1224,7 @@
         <div class="meal-card-header" data-emoji="☕">
           <div class="meal-type">Petite restauration</div>
           <div class="meal-name">Thé du matin</div>
-          <div class="meal-time">⏰ 06h00</div>
+          <div class="meal-time">⏰ 06h30</div>
         </div>
         <div class="meal-card-body">
           <div class="ticket-info">
@@ -1302,16 +1302,16 @@
     
     <div class="hero" style="background: linear-gradient(135deg, #1A7A4A, #0D5C38);">
       <h2>Informations pratiques 📋</h2>
-      <p>Tout ce que tu dois savoir sur le Restaurant ENS/FAST de Natitingou.</p>
+      <p>Guide de fonctionnement du Restaurant ENS/FAST de Natitingou</p>
     </div>
 
     <div class="info-grid">
       <div class="info-card orange">
         <h3>🕐 Horaires de service</h3>
         <ul>
-          <li><span>☕ Thé du matin</span><strong>06h00 — 08h00</strong></li>
-          <li><span>🍛 Déjeuner (midi)</span><strong>12h00 — 14h00</strong></li>
-          <li><span>🌙 Dîner (soir)</span><strong>18h00 — 20h00</strong></li>
+          <li><span>☕ Thé du matin</span><strong>06h30 — 07h00</strong></li>
+          <li><span>🍛 Déjeuner (midi)</span><strong>12h00 — 13h00</strong></li>
+          <li><span>🌙 Dîner (soir)</span><strong>18h00 — 19h00</strong></li>
         </ul>
       </div>
 
@@ -1338,7 +1338,7 @@
           <div class="step-num">2</div>
           <div class="step-text">
             <strong>Clique sur "Réserver"</strong>
-            <small>Remplis ton nom et ton matricule étudiant UNSTIM.</small>
+            <small>Remplis ton nom et ton matricule étudiant.</small>
           </div>
         </div>
         <div class="how-step">
@@ -1378,13 +1378,12 @@
       <div class="admin-login">
         <div class="icon">🔐</div>
         <h3>Espace Gestionnaire</h3>
-        <p>Connecte-toi pour gérer les tickets et voir les réservations.</p>
+        <p>Connectez-vous pour la gestion des tickets.</p>
         <div class="form-group" style="text-align:left">
           <label>Mot de passe</label>
-          <input type="password" id="adminPassword" placeholder="••••••••" onkeypress="if(event.key==='Enter') adminLogin()" />
+          <input type="password" id="adminPassword" placeholder="******" onkeypress="if(event.key==='Enter') adminLogin()" />
         </div>
         <button class="btn-submit" onclick="adminLogin()">Se connecter</button>
-        <p style="margin-top:12px; font-size:12px; color:var(--gray2)">Mot de passe par défaut : <strong>1234</strong></p>
       </div>
     </div>
 
@@ -1434,7 +1433,7 @@
 
         <div class="admin-card">
           <h4>☕ Thé du matin</h4>
-          <p class="subtitle">Service 06h00 • Prix : 75 FCFA</p>
+          <p class="subtitle">Service 06h30 • Prix : 75 FCFA</p>
           <div class="ticket-setter">
             <label>Total tickets</label>
             <input type="number" id="setMatin" min="0" max="999" value="0" />
@@ -1487,7 +1486,7 @@
         <div id="tableContainer">
           <div class="empty-state">
             <div class="icon">📭</div>
-            <p>Aucune réservation pour le moment.</p>
+            <p>Aucune réservation pour l'instant.</p>
           </div>
         </div>
       </div>
@@ -1531,7 +1530,7 @@ function saveData(data) {
 function updateClock() {
   const now = new Date();
   const jours = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
-  const mois = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const mois = ['janvier','février','mars','avril','mai','juin'];
   
   document.getElementById('headerDate').textContent =
     `${jours[now.getDay()]} ${now.getDate()} ${mois[now.getMonth()]} ${now.getFullYear()}`;
@@ -1619,11 +1618,21 @@ function updateUI() {
     }
   });
 
-  // Hero stats
-  const trEl = document.getElementById('totalReservations');
-  const tdEl = document.getElementById('totalTicketsDispo');
-  if (trEl) trEl.textContent = totalRes;
-  if (tdEl) tdEl.textContent = totalDispo;
+  // Hero stats : places restantes par période (utile pour l'étudiant)
+  ['matin', 'midi', 'soir'].forEach(p => {
+    const el = document.getElementById('heroStat' + capitalize(p));
+    if (!el) return;
+    const t = data.tickets[p];
+    if (t.total === 0) {
+      el.textContent = '—';
+    } else if (t.restants === 0) {
+      el.textContent = '❌';
+    } else {
+      el.textContent = t.restants;
+    }
+  });
+
+  // Ancien code totalReservations / totalTicketsDispo supprimé (remplacé ci-dessus)
 
   // Admin inputs
   periodes.forEach(p => {
@@ -1641,7 +1650,7 @@ function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 let currentPeriode = null;
 
 const periodeInfo = {
-  matin: { nom: 'Thé du matin', heure: '06h00', prix: 75 },
+  matin: { nom: 'Thé du matin', heure: '06h30', prix: 75 },
   midi:  { nom: 'Déjeuner (midi)', heure: '12h00', prix: 150 },
   soir:  { nom: 'Dîner (soir)', heure: '18h00', prix: 150 }
 };
@@ -1659,22 +1668,29 @@ function ouvrirReservation(periode) {
   document.getElementById('summaryMeal').textContent = info.nom;
   document.getElementById('summaryTime').textContent = '⏰ Service à ' + info.heure;
   document.getElementById('summaryPrice').textContent = info.prix + ' F';
-  document.getElementById('inputNom').value = '';
   document.getElementById('inputMatricule').value = '';
 
   document.getElementById('modalReservation').classList.add('active');
 }
 
 function confirmerReservation() {
-  const nom = document.getElementById('inputNom').value.trim();
   const matricule = document.getElementById('inputMatricule').value.trim();
 
-  if (!nom) { showNotif('⚠️', 'Saisis ton nom complet.', true); return; }
   if (!matricule) { showNotif('⚠️', 'Saisis ton matricule étudiant.', true); return; }
-  if (nom.length < 3) { showNotif('⚠️', 'Nom trop court.', true); return; }
+  if (matricule.length < 5) { showNotif('⚠️', 'Matricule trop court.', true); return; }
 
   const data = getData();
   const periode = currentPeriode;
+
+  // Vérification : un seul ticket par matricule par période
+  const dejaReserve = data.reservations.find(
+    r => r.matricule === matricule.toUpperCase() && r.periode === periode && r.statut !== 'annule'
+  );
+  if (dejaReserve) {
+    showNotif('⛔', `Tu as déjà un ticket pour ce repas (n°${dejaReserve.num}) !`, true);
+    closeModal();
+    return;
+  }
 
   if (data.tickets[periode].restants <= 0) {
     showNotif('❌', 'Plus de tickets disponibles !', true);
@@ -1690,7 +1706,6 @@ function confirmerReservation() {
   const reservation = {
     id: data.nextNum,
     num: numTicket,
-    nom: nom,
     matricule: matricule.toUpperCase(),
     periode: periode,
     prix: data.tickets[periode].prix,
@@ -1709,7 +1724,6 @@ function confirmerReservation() {
   const info = periodeInfo[periode];
   document.getElementById('confirmNum').textContent = '#' + numTicket;
   document.getElementById('confirmMealDisplay').textContent = info.nom + ' • ' + reservation.prix + ' F';
-  document.getElementById('confirmNom').textContent = nom;
   document.getElementById('confirmMatricule').textContent = reservation.matricule;
   document.getElementById('confirmRepas').textContent = info.nom;
   document.getElementById('confirmHeure').textContent = heure;
@@ -1735,7 +1749,7 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 // ===== ADMIN =====
 function adminLogin() {
   const pwd = document.getElementById('adminPassword').value;
-  if (pwd === '1234') {
+  if (pwd === 'resto.tick') {
     document.getElementById('adminLogin').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
     updateUI();
@@ -1831,7 +1845,7 @@ function renderReservations(filtre) {
   const rows = res.map(r => `
     <tr>
       <td><strong>#${r.num}</strong></td>
-      <td>${r.nom}<br><small style="color:var(--gray2)">${r.matricule}</small></td>
+      <td>${r.matricule}</td>
       <td><span class="tag ${r.periode}">${periodeEmoji[r.periode]} ${periodesNom[r.periode]}</span></td>
       <td><strong>${r.prix} F</strong></td>
       <td>${r.heure}</td>
@@ -1849,7 +1863,7 @@ function renderReservations(filtre) {
       <thead>
         <tr>
           <th>Ticket</th>
-          <th>Étudiant</th>
+          <th>Matricule</th>
           <th>Repas</th>
           <th>Prix</th>
           <th>Heure</th>
@@ -1869,7 +1883,7 @@ function marquerRetire(id) {
     saveData(data);
     updateAdminStats(data);
     renderReservations(filtreActuel);
-    showNotif('✅', `Ticket #${res.num} marqué comme retiré !`, false);
+    showNotif('✅', `Ticket #${res.num} retiré !`, false);
   }
 }
 
@@ -1882,6 +1896,26 @@ function showNotif(icon, msg, isError) {
   notif.classList.add('show');
   setTimeout(() => notif.classList.remove('show'), 3500);
 }
+
+// ===== ACCÈS ADMIN SECRET =====
+// L'onglet admin est invisible. Pour y accéder : cliquer 5 fois rapidement sur le logo.
+let logoClicks = 0;
+let logoTimer = null;
+
+document.getElementById('logoArea').addEventListener('click', function() {
+  logoClicks++;
+  clearTimeout(logoTimer);
+  // Réinitialise le compteur après 2 secondes sans clic
+  logoTimer = setTimeout(() => { logoClicks = 0; }, 2000);
+
+  if (logoClicks >= 5) {
+    logoClicks = 0;
+    // Affiche le bouton admin dans la nav
+    const adminBtn = document.getElementById('navBtnAdmin');
+    adminBtn.style.display = 'block';
+    adminBtn.click();
+  }
+});
 
 // ===== INIT =====
 updateUI();
