@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant ENS/FAST — NATITINGOU</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+:root{--orange:#FF6B35;--orange-dark:#E8521A;--green:#1A7A4A;--green-light:#2ECC71;--yellow:#F4C430;--red:#E74C3C;--dark:#1A1A2E;--dark2:#16213E;--white:#FEFEFE;--gray:#F0F0F0;--gray2:#888;--shadow:0 8px 32px rgba(0,0,0,0.15);--shadow-strong:0 16px 48px rgba(0,0,0,0.25);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Outfit',sans-serif;background:#FFF8F0;color:var(--dark);min-height:100vh;}
+
+header{background:linear-gradient(135deg,var(--dark) 0%,var(--dark2) 60%,#0F3460 100%);color:var(--white);padding:0;position:relative;overflow:hidden;}
+header::before{content:'';position:absolute;top:-50%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(255,107,53,0.3) 0%,transparent 70%);border-radius:50%;}
+.header-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:28px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.logo-area{display:flex;align-items:center;gap:16px;cursor:pointer;user-select:none;}
+.logo-icon{width:60px;height:60px;background:linear-gradient(135deg,var(--orange),var(--yellow));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 16px rgba(255,107,53,0.5);animation:pulse-logo 3s ease-in-out infinite;}
+@keyframes pulse-logo{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+.logo-text h1{font-family:'Playfair Display',serif;font-size:clamp(18px,3vw,26px);font-weight:900;line-height:1.1;}
+.logo-text h1 span{color:var(--orange);}
+.logo-text p{font-size:12px;color:rgba(255,255,255,0.6);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.admin-badge{background:rgba(255,107,53,0.25);border:1px solid rgba(255,107,53,0.5);color:white;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;display:none;}
+.header-date .date{font-size:14px;color:rgba(255,255,255,0.6);text-align:right;}
+.header-date .time{font-size:28px;font-weight:700;color:var(--yellow);font-variant-numeric:tabular-nums;text-align:right;}
+
+.nav-bar{background:var(--dark2);border-bottom:1px solid rgba(255,255,255,0.05);}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;gap:4px;overflow-x:auto;}
+.nav-btn{padding:14px 20px;background:none;border:none;color:rgba(255,255,255,0.5);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;white-space:nowrap;border-bottom:3px solid transparent;}
+.nav-btn:hover{color:var(--white);}
+.nav-btn.active{color:var(--orange);border-bottom-color:var(--orange);}
+.nav-btn.logout{color:rgba(231,76,60,0.7)!important;}
+.nav-btn.logout:hover{color:#E74C3C!important;}
+
+main{max-width:1100px;margin:0 auto;padding:32px 24px 60px;}
+.page{display:none;}
+.page.active{display:block;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.hors-saison{background:linear-gradient(135deg,var(--dark),var(--dark2));border-radius:24px;padding:60px 40px;text-align:center;color:white;}
+.hors-saison .hs-icon{font-size:80px;margin-bottom:20px;}
+.hors-saison h2{font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,34px);margin-bottom:12px;}
+.hors-saison p{opacity:0.7;font-size:16px;line-height:1.7;}
+.hors-saison strong{color:var(--yellow);}
+
+.hero{background:linear-gradient(135deg,var(--orange),var(--orange-dark));border-radius:24px;padding:40px 36px;color:white;margin-bottom:32px;position:relative;overflow:hidden;}
+.hero::before{content:'🍽️';position:absolute;right:30px;top:50%;transform:translateY(-50%);font-size:100px;opacity:0.2;}
+.hero h2{font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,36px);font-weight:900;margin-bottom:10px;}
+.hero p{font-size:16px;opacity:0.9;max-width:500px;line-height:1.6;}
+.hero-stats{display:flex;gap:24px;margin-top:24px;flex-wrap:wrap;}
+.hero-stat{background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border-radius:12px;padding:12px 20px;border:1px solid rgba(255,255,255,0.2);}
+.hero-stat .num{font-size:24px;font-weight:700;}
+.hero-stat .label{font-size:12px;opacity:0.8;}
+
+.section-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.section-title::after{content:'';flex:1;height:2px;background:linear-gradient(to right,var(--orange),transparent);border-radius:2px;}
+
+.meals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:40px;}
+.meal-card{background:white;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);transition:transform 0.3s,box-shadow 0.3s;}
+.meal-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-strong);}
+.meal-card-header{padding:24px;color:white;position:relative;overflow:hidden;}
+.meal-card-header::after{content:attr(data-emoji);position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:48px;opacity:0.3;}
+.meal-card.matin .meal-card-header{background:linear-gradient(135deg,#F39C12,#E67E22);}
+.meal-card.midi .meal-card-header{background:linear-gradient(135deg,#1A7A4A,#27AE60);}
+.meal-card.soir .meal-card-header{background:linear-gradient(135deg,#2980B9,#1A5276);}
+.meal-type{font-size:12px;text-transform:uppercase;letter-spacing:2px;opacity:0.8;margin-bottom:4px;}
+.meal-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;}
+.meal-time{font-size:13px;opacity:0.8;margin-top:4px;}
+.meal-card-body{padding:20px 24px;}
+.ticket-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.ticket-price{font-size:28px;font-weight:700;color:var(--orange);}
+.ticket-price span{font-size:14px;color:var(--gray2);font-weight:400;}
+.ticket-count{text-align:right;}
+.ticket-count .count{font-size:24px;font-weight:700;}
+.ticket-count .count.ok{color:var(--green);}
+.ticket-count .count.warning{color:var(--yellow);}
+.ticket-count .count.danger{color:var(--red);}
+.ticket-count .label{font-size:12px;color:var(--gray2);}
+.progress-bar{height:6px;background:var(--gray);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.progress-fill{height:100%;border-radius:4px;transition:width 0.5s ease;}
+.progress-fill.ok{background:linear-gradient(to right,var(--green-light),var(--green));}
+.progress-fill.warning{background:linear-gradient(to right,#F39C12,var(--yellow));}
+.progress-fill.danger{background:linear-gradient(to right,#E74C3C,#C0392B);}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:16px;}
+.status-badge.ouvert{background:#E8F8EF;color:var(--green);}
+.status-badge.epuise{background:#FDEDEC;color:var(--red);}
+.status-badge.ferme{background:#F0F0F0;color:var(--gray2);}
+.status-badge.hors-creneau{background:#FEF3E2;color:#E67E22;}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.btn-reserver{width:100%;padding:14px;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-reserver.active{background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:white;}
+.btn-reserver.active:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,107,53,0.4);}
+.btn-reserver.disabled{background:var(--gray);color:var(--gray2);cursor:not-allowed;}
+.window-info{font-size:11px;color:var(--gray2);text-align:center;margin-top:8px;line-height:1.4;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(26,26,46,0.85);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.active{display:flex;}
+.modal{background:white;border-radius:24px;padding:36px;width:100%;max-width:480px;box-shadow:0 24px 64px rgba(0,0,0,0.3);animation:slideUp 0.3s ease;position:relative;}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:var(--gray);border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:#ddd;}
+.modal-icon{width:64px;height:64px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:20px;}
+.modal-icon.orange{background:linear-gradient(135deg,#FF6B35,#E8521A);}
+.modal-icon.green{background:linear-gradient(135deg,#27AE60,#1A7A4A);}
+.modal-icon.blue{background:linear-gradient(135deg,#2980B9,#1A5276);}
+.modal h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:8px;}
+.modal p.subtitle{color:var(--gray2);font-size:14px;margin-bottom:24px;line-height:1.5;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--dark);margin-bottom:6px;}
+.form-group input{width:100%;padding:12px 16px;border:2px solid #E8E8E8;border-radius:12px;font-family:'Outfit',sans-serif;font-size:15px;background:#FAFAFA;outline:none;transition:border-color 0.2s;}
+.form-group input:focus{border-color:var(--orange);background:white;}
+.meal-summary{background:linear-gradient(135deg,#FFF3EC,#FFE8D9);border:2px solid #FFD0BB;border-radius:16px;padding:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.meal-summary .meal-info strong{font-size:16px;}
+.meal-summary .meal-info small{color:var(--gray2);font-size:13px;}
+.meal-summary .price{font-size:22px;font-weight:700;color:var(--orange);}
+.btn-submit{width:100%;padding:15px;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 16px rgba(255,107,53,0.3);}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,107,53,0.4);}
+
+.confirm-ticket{background:linear-gradient(135deg,var(--green),#1A7A4A);border-radius:20px;padding:24px;color:white;text-align:center;margin:20px 0;}
+.confirm-ticket .ticket-num{font-size:48px;font-weight:900;font-family:'Playfair Display',serif;letter-spacing:-2px;}
+.confirm-ticket .ticket-label{font-size:12px;opacity:0.8;text-transform:uppercase;letter-spacing:2px;}
+.confirm-details{background:var(--gray);border-radius:12px;padding:16px;margin:16px 0;}
+.confirm-details .detail-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;}
+.confirm-details .detail-row:not(:last-child){border-bottom:1px solid #E0E0E0;}
+.confirm-details .detail-row span:first-child{color:var(--gray2);}
+.confirm-details .detail-row span:last-child{font-weight:600;}
+.confirm-alert{background:#FFF3CD;border:1px solid #FFE69C;border-radius:10px;padding:12px 16px;font-size:13px;color:#856404;margin-top:12px;}
+
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.admin-welcome{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;}
+.admin-welcome span{color:var(--orange);}
+.btn-newday{padding:10px 20px;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:white;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-newday:hover{opacity:0.9;}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:white;border-radius:16px;padding:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;}
+.stat-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.stat-icon.orange{background:#FFF3EC;}.stat-icon.green{background:#E8F8EF;}.stat-icon.yellow{background:#FEF3E2;}
+.stat-card .value{font-size:26px;font-weight:700;line-height:1;}
+.stat-card .label{font-size:12px;color:var(--gray2);margin-top:2px;}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:32px;}
+.admin-card{background:white;border-radius:20px;padding:24px;box-shadow:var(--shadow);}
+.admin-card h4{font-size:16px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.admin-card .subtitle{color:var(--gray2);font-size:13px;margin-bottom:16px;}
+.ticket-setter{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.ticket-setter label{font-size:13px;font-weight:600;width:100px;}
+.ticket-setter input[type="number"]{flex:1;padding:10px 14px;border:2px solid #E8E8E8;border-radius:10px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;text-align:center;outline:none;}
+.ticket-setter input[type="number"]:focus{border-color:var(--orange);}
+.btn-save{width:100%;padding:12px;background:linear-gradient(135deg,var(--green),#1A7A4A);color:white;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;}
+.btn-save:hover{opacity:0.9;transform:translateY(-1px);}
+.btn-reset{width:100%;padding:10px;background:#FDEDEC;color:var(--red);border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;}
+.btn-reset:hover{background:#FADADD;}
+.reservations-section{background:white;border-radius:20px;padding:24px;box-shadow:var(--shadow);}
+.reservations-section h4{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.count-badge{background:var(--orange);color:white;border-radius:20px;padding:2px 12px;font-size:14px;font-family:'Outfit',sans-serif;font-weight:600;}
+.res-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.res-filter{padding:6px 14px;border-radius:20px;border:2px solid #E8E8E8;background:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.res-filter.active{border-color:var(--orange);color:var(--orange);background:#FFF3EC;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray2);padding:8px 12px;border-bottom:2px solid var(--gray);}
+td{padding:12px;border-bottom:1px solid var(--gray);font-size:14px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FAFAFA;}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.tag.matin{background:#FEF3E2;color:#E67E22;}.tag.midi{background:#E8F8EF;color:var(--green);}.tag.soir{background:#EBF5FB;color:#2980B9;}
+.tag.retire{background:#E8F8EF;color:var(--green);}.tag.en-attente{background:#FEF3E2;color:#E67E22;}
+.btn-retire{padding:5px 12px;background:var(--green);color:white;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-retire:hover{background:#1A7A4A;}
+.btn-retire:disabled{background:var(--gray);color:var(--gray2);cursor:not-allowed;}
+.empty-state{text-align:center;padding:40px;color:var(--gray2);}
+.empty-state .icon{font-size:40px;margin-bottom:12px;}.empty-state p{font-size:15px;}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}
+.info-card{background:white;border-radius:20px;padding:28px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.info-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+.info-card.orange::before{background:linear-gradient(to right,var(--orange),var(--yellow));}
+.info-card.green::before{background:linear-gradient(to right,var(--green),var(--green-light));}
+.info-card.blue::before{background:linear-gradient(to right,#2980B9,#3498DB);}
+.info-card h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.info-card ul{list-style:none;}
+.info-card ul li{padding:10px 0;border-bottom:1px solid var(--gray);font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.info-card ul li:last-child{border-bottom:none;}
+.info-card ul li span{color:var(--gray2);}
+.info-card ul li strong{font-weight:600;}
+.how-step{display:flex;gap:16px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--gray);}
+.how-step:last-child{border-bottom:none;}
+.step-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:white;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-text strong{display:block;font-size:14px;margin-bottom:2px;}
+.step-text small{color:var(--gray2);font-size:12px;line-height:1.4;}
+.notif{position:fixed;top:20px;right:20px;background:white;border-radius:14px;padding:16px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.2);z-index:2000;display:flex;align-items:center;gap:12px;transform:translateX(120%);transition:transform 0.3s ease;max-width:320px;border-left:4px solid var(--green);}
+.notif.show{transform:translateX(0);}
+.notif.error{border-color:var(--red);}
+.notif .notif-icon{font-size:24px;}.notif .notif-msg{font-size:14px;font-weight:500;line-height:1.4;}
+.sync-indicator{position:fixed;bottom:20px;right:20px;background:var(--dark2);color:white;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;display:none;align-items:center;gap:8px;z-index:1500;}
+.sync-indicator.show{display:flex;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green-light);animation:blink 1s infinite;}
+footer{text-align:center;padding:24px;color:var(--gray2);font-size:13px;border-top:1px solid #E8E8E8;background:white;}
+footer strong{color:var(--orange);}
+@media(max-width:600px){.header-inner{padding:20px 16px;}main{padding:20px 16px 60px;}.hero{padding:28px 20px;}.modal{padding:24px 20px;}th:nth-child(3),td:nth-child(3){display:none;}}
+</style>
+</head>
+<body>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif">
+  <span class="notif-icon" id="notifIcon">✅</span>
+  <span class="notif-msg" id="notifMsg">OK</span>
+</div>
+
+<!-- INDICATEUR SYNC -->
+<div class="sync-indicator" id="syncIndicator">
+  <div class="sync-dot"></div> Synchronisation...
+</div>
+
+<!-- MODAL LOGIN ADMIN (accès secret) -->
+<div class="modal-overlay" id="modalAdminLogin">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-close" onclick="closeModal('modalAdminLogin')">✕</button>
+    <div class="modal-icon blue">🔐</div>
+    <h3>Espace Gestionnaire</h3>
+    <p class="subtitle">Accès réservé au gestionnaire du restaurant ENS/FAST.</p>
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" id="adminPassword" placeholder="••••••••" style="text-transform:none"
+        onkeypress="if(event.key==='Enter')adminLogin()" />
+    </div>
+    <button class="btn-submit" onclick="adminLogin()">🔓 Se connecter</button>
+  </div>
+</div>
+
+<!-- MODAL RÉSERVATION -->
+<div class="modal-overlay" id="modalReservation">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalReservation')">✕</button>
+    <div class="modal-icon orange">🍽️</div>
+    <h3>Réserver un ticket</h3>
+    <p class="subtitle">Saisis ton numéro matricule pour réserver. Viens ensuite payer au guichet aux heures de service.</p>
+    <div class="meal-summary">
+      <div class="meal-info">
+        <strong id="summaryMeal">—</strong><br>
+        <small id="summaryTime">—</small>
+      </div>
+      <div class="price" id="summaryPrice">—</div>
+    </div>
+    <div class="form-group">
+      <label>Numéro matricule *</label>
+      <input type="text" id="inputMatricule" placeholder="Ex: 11093STI26" maxlength="20"
+        style="text-transform:uppercase" onkeypress="if(event.key==='Enter')confirmerReservation()" />
+    </div>
+    <button class="btn-submit" onclick="confirmerReservation()">🎟️ Confirmer la réservation</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION -->
+<div class="modal-overlay" id="modalConfirmation">
+  <div class="modal">
+    <div class="modal-icon green">✅</div>
+    <h3>Réservation confirmée !</h3>
+    <p class="subtitle">Présente ce numéro de ticket au guichet pour retirer ton repas.</p>
+    <div class="confirm-ticket">
+      <div class="ticket-label">Numéro de ticket</div>
+      <div class="ticket-num" id="confirmNum">#000</div>
+      <div style="font-size:13px;opacity:0.8;margin-top:4px" id="confirmMealDisplay">—</div>
+    </div>
+    <div class="confirm-details">
+      <div class="detail-row"><span>Matricule</span><span id="confirmMatricule">—</span></div>
+      <div class="detail-row"><span>Repas</span><span id="confirmRepas">—</span></div>
+      <div class="detail-row"><span>Heure</span><span id="confirmHeure">—</span></div>
+    </div>
+    <div class="confirm-alert">
+      ⚠️ Viens au guichet aux heures de service. Paiement de <strong id="confirmPrix">—</strong> FCFA sur place.
+    </div>
+    <button class="btn-submit" style="margin-top:16px;background:linear-gradient(135deg,var(--green),#1A7A4A);"
+      onclick="closeModal('modalConfirmation')">👍 Compris !</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo-area" id="logoArea">
+      <div class="logo-icon">🍽️</div>
+      <div class="logo-text">
+        <h1>RESTAURANT <span>ENS/FAST</span></h1>
+        <p>UNSTIM • Natitingou</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="admin-badge" id="adminBadge">⚙️ Gestionnaire</span>
+      <div class="header-date">
+        <div class="date" id="headerDate">—</div>
+        <div class="time" id="headerTime">00:00</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV ÉTUDIANTS (visible par défaut) -->
+<nav class="nav-bar" id="studentNav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showStudentPage('accueil',this)">🏠 Accueil</button>
+    <button class="nav-btn" onclick="showStudentPage('infos',this)">ℹ️ Informations</button>
+  </div>
+</nav>
+
+<!-- NAV GESTIONNAIRE (masquée par défaut) -->
+<nav class="nav-bar" id="adminNav" style="display:none">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showAdminPage('dashboard',this)">📊 Tableau de bord</button>
+    <button class="nav-btn" onclick="showAdminPage('tickets',this)">🎟️ Gestion tickets</button>
+    <button class="nav-btn" onclick="showAdminPage('reservations',this)">📋 Réservations</button>
+    <button class="nav-btn logout" onclick="adminLogout()">🚪 Déconnexion</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ===== ESPACE ÉTUDIANT ===== -->
+<div id="studentWrapper">
+
+  <div class="page active" id="page-accueil">
+
+    <!-- MESSAGE HORS SAISON -->
+    <div id="horsSaisonMsg" style="display:none">
+      <div class="hors-saison">
+        <div class="hs-icon">🏖️</div>
+        <h2>Restaurant fermé pour la saison</h2>
+        <p>Le restaurant ENS/FAST est ouvert de <strong>décembre au 30 juin</strong>.<br>
+        Rendez-vous à la réouverture en décembre. Bonnes vacances ! 😊</p>
+      </div>
+    </div>
+
+    <div id="mainContent">
+      <div class="hero">
+        <h2>Bienvenue au Restaurant Universitaire ! 🎓</h2>
+        <p>Réserve ton ticket en ligne — simple, rapide et sans file d'attente !</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num" id="heroStatMatin">—</div><div class="label">☕ Places matin</div></div>
+          <div class="hero-stat"><div class="num" id="heroStatMidi">—</div><div class="label">🍛 Places midi</div></div>
+          <div class="hero-stat"><div class="num" id="heroStatSoir">—</div><div class="label">🌙 Places soir</div></div>
+        </div>
+      </div>
+
+      <div class="section-title">🎟️ Tickets disponibles aujourd'hui</div>
+      <div class="meals-grid">
+
+        <div class="meal-card matin">
+          <div class="meal-card-header" data-emoji="☕">
+            <div class="meal-type">Petite restauration</div>
+            <div class="meal-name">Thé du matin</div>
+            <div class="meal-time">⏰ Service à 06h30</div>
+          </div>
+          <div class="meal-card-body">
+            <div class="ticket-info">
+              <div class="ticket-price">75 <span>FCFA</span></div>
+              <div class="ticket-count"><div class="count ok" id="countMatin">—</div><div class="label">tickets restants</div></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill ok" id="progressMatin" style="width:100%"></div></div>
+            <div id="badgeMatin"></div>
+            <button class="btn-reserver disabled" id="btnMatin">🎟️ Réserver</button>
+            <div class="window-info" id="windowMatin">Réservations : soirée de la veille jusqu'à 06h10</div>
+          </div>
+        </div>
+
+        <div class="meal-card midi">
+          <div class="meal-card-header" data-emoji="🍛">
+            <div class="meal-type">Déjeuner</div>
+            <div class="meal-name">Repas du midi</div>
+            <div class="meal-time">⏰ Service à 12h00</div>
+          </div>
+          <div class="meal-card-body">
+            <div class="ticket-info">
+              <div class="ticket-price">150 <span>FCFA</span></div>
+              <div class="ticket-count"><div class="count ok" id="countMidi">—</div><div class="label">tickets restants</div></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill ok" id="progressMidi" style="width:100%"></div></div>
+            <div id="badgeMidi"></div>
+            <button class="btn-reserver disabled" id="btnMidi">🎟️ Réserver</button>
+            <div class="window-info" id="windowMidi">Réservations : 10h00 – 11h50</div>
+          </div>
+        </div>
+
+        <div class="meal-card soir">
+          <div class="meal-card-header" data-emoji="🌙">
+            <div class="meal-type">Dîner</div>
+            <div class="meal-name">Repas du soir</div>
+            <div class="meal-time">⏰ Service à 18h00</div>
+          </div>
+          <div class="meal-card-body">
+            <div class="ticket-info">
+              <div class="ticket-price">150 <span>FCFA</span></div>
+              <div class="ticket-count"><div class="count ok" id="countSoir">—</div><div class="label">tickets restants</div></div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill ok" id="progressSoir" style="width:100%"></div></div>
+            <div id="badgeSoir"></div>
+            <button class="btn-reserver disabled" id="btnSoir">🎟️ Réserver</button>
+            <div class="window-info" id="windowSoir">Réservations : 14h00 – 17h50</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /page-accueil -->
+
+  <div class="page" id="page-infos">
+    <div class="hero" style="background:linear-gradient(135deg,#1A7A4A,#0D5C38);">
+      <h2>Informations pratiques 📋</h2>
+      <p>Guide de fonctionnement du Restaurant ENS/FAST de Natitingou</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-card orange">
+        <h3>🕐 Horaires de service</h3>
+        <ul>
+          <li><span>☕ Thé du matin</span><strong>06h30 — 07h00</strong></li>
+          <li><span>🍛 Déjeuner</span><strong>12h00 — 13h00</strong></li>
+          <li><span>🌙 Dîner</span><strong>18h00 — 19h00</strong></li>
+        </ul>
+      </div>
+      <div class="info-card green">
+        <h3>💰 Tarifs</h3>
+        <ul>
+          <li><span>☕ Thé du matin</span><strong>75 FCFA</strong></li>
+          <li><span>🍛 Déjeuner</span><strong>150 FCFA</strong></li>
+          <li><span>🌙 Dîner</span><strong>150 FCFA</strong></li>
+          <li><span>💳 Paiement</span><strong>Sur place au guichet</strong></li>
+        </ul>
+      </div>
+      <div class="info-card blue">
+        <h3>📱 Comment réserver ?</h3>
+        <div class="how-step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <strong>Vérifie le créneau</strong>
+            <small>Matin : soirée → 06h10 • Midi : 10h00–11h50 • Soir : 14h00–17h50</small>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <strong>Clique sur "Réserver"</strong>
+            <small>Saisis uniquement ton numéro matricule (ex: 11093STI26).</small>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <strong>Note ton numéro de ticket</strong>
+            <small>Un numéro unique t'est attribué. Garde-le !</small>
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            <strong>Viens payer au guichet</strong>
+            <small>Présente ton numéro et paie sur place.</small>
+          </div>
+        </div>
+      </div>
+      <div class="info-card orange">
+        <h3>📍 Localisation & Saison</h3>
+        <ul>
+          <li><span>🏛️ Université</span><strong>UNSTIM</strong></li>
+          <li><span>📍 Ville</span><strong>Natitingou</strong></li>
+          <li><span>🏫 Rattaché à</span><strong>ENS / FAST</strong></li>
+          <li><span>📅 Saison</span><strong>Décembre – 30 juin</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div><!-- /page-infos -->
+
+</div><!-- /studentWrapper -->
+
+
+<!-- ===== ESPACE GESTIONNAIRE ===== -->
+<div id="adminWrapper" style="display:none">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="admin-page-dashboard">
+    <div class="admin-header">
+      <div class="admin-welcome">Bonjour, <span>Gestionnaire</span> 👋</div>
+      <button class="btn-newday" onclick="nouvelleJournee()">🌅 Nouvelle journée</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon orange">📊</div><div><div class="value" id="statTotal">0</div><div class="label">Réservations totales</div></div></div>
+      <div class="stat-card"><div class="stat-icon yellow">⏳</div><div><div class="value" id="statAttente">0</div><div class="label">En attente</div></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="value" id="statRetire">0</div><div class="label">Retirés</div></div></div>
+      <div class="stat-card"><div class="stat-icon orange">💰</div><div><div class="value" id="statRevenu">0 FCFA</div><div class="label">Revenus estimés</div></div></div>
+    </div>
+    <div class="section-title">📈 Résumé par période</div>
+    <div class="admin-grid" id="dashboardSummary"></div>
+  </div>
+
+  <!-- GESTION TICKETS -->
+  <div class="page" id="admin-page-tickets">
+    <div class="section-title">⚙️ Gestion des tickets</div>
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h4>☕ Thé du matin</h4>
+        <p class="subtitle">Service 06h30 • Réservations : soirée → 06h10 • 75 FCFA</p>
+        <div class="ticket-setter"><label>Nb tickets</label><input type="number" id="setMatin" min="0" max="999" value="0"/></div>
+        <button class="btn-save" onclick="sauvegarderTickets('matin')">💾 Sauvegarder</button>
+        <button class="btn-reset" onclick="reinitialiserPeriode('matin')">🔄 Réinitialiser</button>
+      </div>
+      <div class="admin-card">
+        <h4>🍛 Repas du midi</h4>
+        <p class="subtitle">Service 12h00 • Réservations : 10h00–11h50 • 150 FCFA</p>
+        <div class="ticket-setter"><label>Nb tickets</label><input type="number" id="setMidi" min="0" max="999" value="0"/></div>
+        <button class="btn-save" onclick="sauvegarderTickets('midi')">💾 Sauvegarder</button>
+        <button class="btn-reset" onclick="reinitialiserPeriode('midi')">🔄 Réinitialiser</button>
+      </div>
+      <div class="admin-card">
+        <h4>🌙 Repas du soir</h4>
+        <p class="subtitle">Service 18h00 • Réservations : 14h00–17h50 • 150 FCFA</p>
+        <div class="ticket-setter"><label>Nb tickets</label><input type="number" id="setSoir" min="0" max="999" value="0"/></div>
+        <button class="btn-save" onclick="sauvegarderTickets('soir')">💾 Sauvegarder</button>
+        <button class="btn-reset" onclick="reinitialiserPeriode('soir')">🔄 Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RÉSERVATIONS -->
+  <div class="page" id="admin-page-reservations">
+    <div class="section-title">📋 Liste des réservations</div>
+    <div class="reservations-section">
+      <h4>Réservations du jour <span class="count-badge" id="countBadge">0</span></h4>
+      <div class="res-filters">
+        <button class="res-filter active" onclick="filtrerRes('tous',this)">Tous</button>
+        <button class="res-filter" onclick="filtrerRes('matin',this)">☕ Matin</button>
+        <button class="res-filter" onclick="filtrerRes('midi',this)">🍛 Midi</button>
+        <button class="res-filter" onclick="filtrerRes('soir',this)">🌙 Soir</button>
+        <button class="res-filter" onclick="filtrerRes('en-attente',this)">⏳ En attente</button>
+        <button class="res-filter" onclick="filtrerRes('retire',this)">✅ Retirés</button>
+      </div>
+      <div id="tableContainer">
+        <div class="empty-state"><div class="icon">📭</div><p>Aucune réservation pour l'instant.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /adminWrapper -->
+
+</main>
+
+<footer>
+  Restaurant <strong>ENS/FAST Natitingou</strong> — UNSTIM • Système de réservation en ligne 🎓
+</footer>
+
+<script>
+// ===== FIREBASE =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDLJgEXAzcmmodwN9zOvwwLcFwjk4X7d4M",
+  authDomain: "restauration-universitaire.firebaseapp.com",
+  databaseURL: "https://restauration-universitaire-default-rtdb.firebaseio.com",
+  projectId: "restauration-universitaire",
+  storageBucket: "restauration-universitaire.firebasestorage.app",
+  messagingSenderId: "640859416924",
+  appId: "1:640859416924:web:c0ea527a2b274f26863999"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const REF = 'restaurant_data';
+
+// ===== STATE =====
+let state = null, isAdmin = false, currentPeriode = null, filtreActuel = 'tous';
+let ignoreNextSync = false; // évite double update après persist()
+
+function defaultData() {
+  return {
+    tickets: {
+      matin:  { total: 0, restants: 0, prix: 75  },
+      midi:   { total: 0, restants: 0, prix: 150 },
+      soir:   { total: 0, restants: 0, prix: 150 }
+    },
+    reservations: [],
+    nextNum: 1
+  };
+}
+
+async function loadState() {
+  showSync(true);
+  try {
+    const snap = await db.ref(REF).once('value');
+    const val = snap.val();
+    if (val) {
+      state = val;
+      if (!state.reservations) state.reservations = [];
+      if (!state.nextNum) state.nextNum = 1;
+    } else {
+      state = defaultData();
+      await persist();
+    }
+  } catch(e) {
+    console.error('Erreur chargement :', e);
+    state = defaultData();
+  }
+  showSync(false);
+  updateUI();
+  initRealtimeSync();
+}
+
+async function persist() {
+  showSync(true);
+  ignoreNextSync = true;
+  try {
+    await db.ref(REF).set(state);
+  } catch(e) {
+    console.error('Erreur sauvegarde :', e);
+    showNotif('❌', 'Erreur de connexion Firebase.', true);
+  }
+  showSync(false);
+}
+
+function initRealtimeSync() {
+  db.ref(REF).on('value', snap => {
+    if (ignoreNextSync) { ignoreNextSync = false; return; }
+    const val = snap.val();
+    if (!val) return;
+    if (!val.reservations) val.reservations = [];
+    state = val;
+    updateUI();
+    if (isAdmin) { renderDashboard(); renderReservations(filtreActuel); }
+  });
+}
+
+function showSync(on) {
+  document.getElementById('syncIndicator').classList.toggle('show', on);
+}
+
+// ===== SAISON =====
+function inSeason() {
+  const now = new Date(), mo = now.getMonth() + 1, d = now.getDate();
+  return mo === 12 || (mo >= 1 && mo <= 5) || (mo === 6 && d <= 30);
+}
+
+// ===== CRÉNEAU =====
+function windowStatus(p) {
+  if (!inSeason()) return { open: false, msg: 'Restaurant fermé (hors saison : déc. – 30 juin)' };
+  const t = state.tickets[p];
+  if (!t || t.total === 0) return { open: false, msg: 'Non configuré par le gestionnaire' };
+  if (t.restants === 0) return { open: false, msg: 'Tickets épuisés' };
+  const now = new Date(), min = now.getHours() * 60 + now.getMinutes();
+  if (p === 'matin') {
+    const open = min >= 18 * 60 || min <= 6 * 60 + 10;
+    return { open, msg: open ? "✅ Réservations ouvertes jusqu'à 06h10" : '🔒 Réservations : soirée (18h00) jusqu\'à 06h10' };
+  }
+  if (p === 'midi') {
+    if (min < 10 * 60)  return { open: false, msg: '🔒 Réservations ouvertes à partir de 10h00' };
+    if (min > 11 * 60 + 50) return { open: false, msg: '🔒 Créneau terminé — guichet ouvert' };
+    return { open: true, msg: "✅ Réservations ouvertes jusqu'à 11h50" };
+  }
+  if (p === 'soir') {
+    if (min < 14 * 60)  return { open: false, msg: '🔒 Réservations ouvertes à partir de 14h00' };
+    if (min > 17 * 60 + 50) return { open: false, msg: '🔒 Créneau terminé — guichet ouvert' };
+    return { open: true, msg: "✅ Réservations ouvertes jusqu'à 17h50" };
+  }
+  return { open: false, msg: '' };
+}
+
+// ===== HORLOGE =====
+// CORRECTION : tableau complet des 12 mois
+const JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const MOIS  = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('headerDate').textContent =
+    `${JOURS[now.getDay()]} ${now.getDate()} ${MOIS[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('headerTime').textContent =
+    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  if (now.getSeconds() === 0 && state) updateUI();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ===== NAVIGATION =====
+function showStudentPage(p, btn) {
+  document.querySelectorAll('#studentWrapper .page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('#studentNav .nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (state) updateUI();
+}
+function showAdminPage(p, btn) {
+  document.querySelectorAll('#adminWrapper .page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('#adminNav .nav-btn:not(.logout)').forEach(b => b.classList.remove('active'));
+  document.getElementById('admin-page-' + p).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (p === 'reservations') renderReservations(filtreActuel);
+  if (p === 'dashboard')    renderDashboard();
+}
+
+// ===== UPDATE UI =====
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function updateUI() {
+  if (!state) return;
+  const season = inSeason();
+  const hs = document.getElementById('horsSaisonMsg');
+  const mc = document.getElementById('mainContent');
+  if (hs) hs.style.display = season ? 'none' : 'block';
+  if (mc) mc.style.display = season ? 'block' : 'none';
+
+  ['matin','midi','soir'].forEach(p => {
+    const t   = state.tickets[p];
+    const cnt = document.getElementById('count'   + cap(p));
+    const prg = document.getElementById('progress' + cap(p));
+    const btn = document.getElementById('btn'      + cap(p));
+    const bdg = document.getElementById('badge'    + cap(p));
+    const win = document.getElementById('window'   + cap(p));
+    const hro = document.getElementById('heroStat' + cap(p));
+    if (!cnt) return;
+
+    const { restants, total } = t;
+    const pct = total > 0 ? (restants / total) * 100 : 0;
+    const cls = restants === 0 ? 'danger' : pct < 30 ? 'warning' : 'ok';
+
+    cnt.textContent = restants;
+    cnt.className = 'count ' + cls;
+    if (prg) { prg.style.width = pct + '%'; prg.className = 'progress-fill ' + cls; }
+
+    const ws = windowStatus(p);
+    if (bdg) {
+      if (!season)       bdg.innerHTML = `<span class="status-badge ferme"><span class="badge-dot"></span>Hors saison</span>`;
+      else if (total===0) bdg.innerHTML = `<span class="status-badge ferme"><span class="badge-dot"></span>Non configuré</span>`;
+      else if (restants===0) bdg.innerHTML = `<span class="status-badge epuise"><span class="badge-dot"></span>Épuisé</span>`;
+      else if (!ws.open) bdg.innerHTML = `<span class="status-badge hors-creneau"><span class="badge-dot"></span>Hors créneau</span>`;
+      else               bdg.innerHTML = `<span class="status-badge ouvert"><span class="badge-dot"></span>Disponible</span>`;
+    }
+    if (btn) {
+      if (ws.open) {
+        btn.className = 'btn-reserver active';
+        btn.textContent = '🎟️ Réserver un ticket';
+        btn.onclick = () => ouvrirReservation(p);
+      } else {
+        btn.className = 'btn-reserver disabled';
+        btn.textContent = restants === 0 && total > 0 ? '❌ Tickets épuisés' : total === 0 ? '⚙️ Non disponible' : '🔒 Hors créneau';
+        btn.onclick = null;
+      }
+    }
+    if (win) win.textContent = ws.msg;
+    if (hro) hro.textContent = !season ? '—' : total === 0 ? '—' : restants === 0 ? '❌' : String(restants);
+  });
+
+  ['matin','midi','soir'].forEach(p => {
+    const el = document.getElementById('set' + cap(p));
+    if (el) el.value = state.tickets[p].total;
+  });
+  if (isAdmin) { updateAdminStats(); renderDashboard(); }
+}
+
+// ===== RÉSERVATION =====
+const PINFO = {
+  matin: { nom: 'Thé du matin',    heure: '06h30', prix: 75,  em: '☕' },
+  midi:  { nom: 'Déjeuner (midi)', heure: '12h00', prix: 150, em: '🍛' },
+  soir:  { nom: 'Dîner (soir)',    heure: '18h00', prix: 150, em: '🌙' }
+};
+
+function ouvrirReservation(p) {
+  const ws = windowStatus(p);
+  if (!ws.open) { showNotif('🔒', ws.msg, true); return; }
+  currentPeriode = p;
+  const info = PINFO[p];
+  document.getElementById('summaryMeal').textContent  = info.em + ' ' + info.nom;
+  document.getElementById('summaryTime').textContent  = '⏰ Service à ' + info.heure;
+  document.getElementById('summaryPrice').textContent = info.prix + ' FCFA';
+  document.getElementById('inputMatricule').value = '';
+  document.getElementById('modalReservation').classList.add('active');
+  setTimeout(() => document.getElementById('inputMatricule').focus(), 200);
+}
+
+async function confirmerReservation() {
+  const mat = document.getElementById('inputMatricule').value.trim().toUpperCase();
+  if (!mat || mat.length < 6) { showNotif('⚠️', 'Saisis un matricule valide (min. 6 caractères).', true); return; }
+
+  const ws = windowStatus(currentPeriode);
+  if (!ws.open) { showNotif('🔒', ws.msg, true); closeModal('modalReservation'); return; }
+
+  // Un seul ticket par matricule par période
+  const deja = state.reservations.find(r => r.matricule === mat && r.periode === currentPeriode);
+  if (deja) { showNotif('⛔', `Tu as déjà un ticket pour ce repas (n°${deja.num}) !`, true); closeModal('modalReservation'); return; }
+
+  if (state.tickets[currentPeriode].restants <= 0) { showNotif('❌', 'Plus de tickets disponibles !', true); closeModal('modalReservation'); return; }
+
+  const num   = String(state.nextNum).padStart(3, '0');
+  const now   = new Date();
+  const heure = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  const res = { id: state.nextNum, num, matricule: mat, periode: currentPeriode,
+    prix: state.tickets[currentPeriode].prix, heure,
+    date: now.toLocaleDateString('fr-FR'), statut: 'en-attente' };
+
+  state.reservations.push(res);
+  state.tickets[currentPeriode].restants--;
+  state.nextNum++;
+  await persist();
+
+  closeModal('modalReservation');
+  const info = PINFO[currentPeriode];
+  document.getElementById('confirmNum').textContent         = '#' + num;
+  document.getElementById('confirmMealDisplay').textContent = info.em + ' ' + info.nom + ' • ' + res.prix + ' FCFA';
+  document.getElementById('confirmMatricule').textContent   = mat;
+  document.getElementById('confirmRepas').textContent       = info.nom;
+  document.getElementById('confirmHeure').textContent       = heure;
+  document.getElementById('confirmPrix').textContent        = res.prix;
+  document.getElementById('modalConfirmation').classList.add('active');
+  updateUI();
+  showNotif('✅', 'Ticket #' + num + ' réservé !', false);
+}
+
+function closeModal(id) {
+  if (id) document.getElementById(id).classList.remove('active');
+  else document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+  if (!id || ['modalReservation','modalConfirmation'].includes(id)) currentPeriode = null;
+}
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); });
+});
+
+// ===== ADMIN AUTH =====
+function adminLogin() {
+  const pwd = document.getElementById('adminPassword').value;
+  if (pwd === 'resto.tick') {
+    isAdmin = true;
+    closeModal('modalAdminLogin');
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('studentNav').style.display    = 'none';
+    document.getElementById('adminNav').style.display      = 'block';
+    document.getElementById('studentWrapper').style.display = 'none';
+    document.getElementById('adminWrapper').style.display  = 'block';
+    document.getElementById('adminBadge').style.display    = 'inline-block';
+    updateUI(); renderReservations('tous'); renderDashboard();
+    showNotif('✅', 'Connecté — Mode Gestionnaire', false);
+  } else {
+    showNotif('❌', 'Mot de passe incorrect !', true);
+  }
+}
+
+function adminLogout() {
+  isAdmin = false;
+  document.getElementById('studentNav').style.display    = 'block';
+  document.getElementById('adminNav').style.display      = 'none';
+  document.getElementById('studentWrapper').style.display = 'block';
+  document.getElementById('adminWrapper').style.display  = 'none';
+  document.getElementById('adminBadge').style.display    = 'none';
+  document.querySelectorAll('#studentNav .nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#studentNav .nav-btn').classList.add('active');
+  document.querySelectorAll('#adminWrapper .page').forEach(x => x.classList.remove('active'));
+  document.getElementById('admin-page-dashboard').classList.add('active');
+  updateUI();
+  showNotif('👋', 'Déconnexion réussie.', false);
+}
+
+// ===== ADMIN TICKETS =====
+async function sauvegarderTickets(p) {
+  const val = parseInt(document.getElementById('set' + cap(p)).value);
+  if (isNaN(val) || val < 0) { showNotif('⚠️', 'Saisis un nombre valide.', true); return; }
+  const diff = val - state.tickets[p].total;
+  state.tickets[p].total    = val;
+  state.tickets[p].restants = Math.min(val, Math.max(0, state.tickets[p].restants + diff));
+  await persist();
+  updateUI();
+  showNotif('✅', `${cap(p)} : ${val} ticket(s) configuré(s) !`, false);
+}
+
+async function reinitialiserPeriode(p) {
+  if (!confirm(`Réinitialiser tickets et réservations pour "${p}" ?`)) return;
+  state.tickets[p].restants  = state.tickets[p].total;
+  state.reservations = state.reservations.filter(r => r.periode !== p);
+  await persist();
+  updateUI(); renderReservations(filtreActuel); renderDashboard();
+  showNotif('🔄', `Période "${p}" réinitialisée !`, false);
+}
+
+async function nouvelleJournee() {
+  if (!confirm('Lancer une nouvelle journée ? Toutes les réservations seront effacées.')) return;
+  ['matin','midi','soir'].forEach(p => { state.tickets[p].restants = state.tickets[p].total; });
+  state.reservations = [];
+  await persist();
+  updateUI(); renderReservations('tous'); renderDashboard();
+  showNotif('🌅', 'Nouvelle journée lancée !', false);
+}
+
+// ===== ADMIN STATS =====
+function updateAdminStats() {
+  const total  = state.reservations.length;
+  const att    = state.reservations.filter(r => r.statut === 'en-attente').length;
+  const ret    = state.reservations.filter(r => r.statut === 'retire').length;
+  const revenu = state.reservations.filter(r => r.statut === 'retire').reduce((s,r) => s + r.prix, 0);
+  const $ = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  $('statTotal', total); $('statAttente', att); $('statRetire', ret);
+  $('statRevenu', revenu + ' FCFA'); $('countBadge', total);
+}
+
+function renderDashboard() {
+  if (!state) return;
+  const c = document.getElementById('dashboardSummary');
+  if (!c) return;
+  const meta = { matin:{em:'☕',nom:'Matin',prix:75}, midi:{em:'🍛',nom:'Midi',prix:150}, soir:{em:'🌙',nom:'Soir',prix:150} };
+  c.innerHTML = ['matin','midi','soir'].map(p => {
+    const t = state.tickets[p];
+    const rp  = state.reservations.filter(r => r.periode === p);
+    const att = rp.filter(r => r.statut === 'en-attente').length;
+    const ret = rp.filter(r => r.statut === 'retire').length;
+    const pct = t.total > 0 ? Math.round((1 - t.restants / t.total) * 100) : 0;
+    return `<div class="admin-card">
+      <h4>${meta[p].em} ${meta[p].nom}</h4>
+      <p class="subtitle">${t.restants}/${t.total} restants — ${pct}% vendus</p>
+      <div class="progress-bar" style="margin-bottom:12px">
+        <div class="progress-fill ${t.restants===0?'danger':pct>70?'warning':'ok'}" style="width:${pct}%"></div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:13px;flex-wrap:wrap">
+        <div><strong>${att}</strong> <span style="color:var(--gray2)">en attente</span></div>
+        <div><strong>${ret}</strong> <span style="color:var(--gray2)">retirés</span></div>
+        <div><strong>${ret * meta[p].prix} FCFA</strong> <span style="color:var(--gray2)">encaissés</span></div>
+      </div>
+    </div>`;
+  }).join('');
+  updateAdminStats();
+}
+
+// ===== RÉSERVATIONS TABLE =====
+function filtrerRes(f, btn) {
+  filtreActuel = f;
+  document.querySelectorAll('.res-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReservations(f);
+}
+
+function renderReservations(f) {
+  if (!state) return;
+  let res = [...state.reservations];
+  if (f === 'matin')      res = res.filter(r => r.periode === 'matin');
+  else if (f === 'midi')  res = res.filter(r => r.periode === 'midi');
+  else if (f === 'soir')  res = res.filter(r => r.periode === 'soir');
+  else if (f === 'en-attente') res = res.filter(r => r.statut === 'en-attente');
+  else if (f === 'retire')     res = res.filter(r => r.statut === 'retire');
+
+  const cont = document.getElementById('tableContainer');
+  if (!cont) return;
+  const cb = document.getElementById('countBadge');
+  if (cb) cb.textContent = state.reservations.length;
+
+  if (res.length === 0) {
+    cont.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>Aucune réservation${f!=='tous'?' pour ce filtre':''}.</p></div>`;
+    return;
+  }
+  const em = { matin:'☕', midi:'🍛', soir:'🌙' };
+  const nm = { matin:'Matin', midi:'Midi', soir:'Soir' };
+  cont.innerHTML = `<table><thead><tr>
+    <th>Ticket</th><th>Matricule</th><th>Repas</th><th>Prix</th><th>Heure</th><th>Statut</th><th>Action</th>
+  </tr></thead><tbody>
+    ${res.map(r => `<tr>
+      <td><strong>#${r.num}</strong></td>
+      <td>${r.matricule}</td>
+      <td><span class="tag ${r.periode}">${em[r.periode]} ${nm[r.periode]}</span></td>
+      <td><strong>${r.prix} FCFA</strong></td>
+      <td>${r.heure}</td>
+      <td><span class="tag ${r.statut}">${r.statut==='retire'?'✅ Retiré':'⏳ En attente'}</span></td>
+      <td><button class="btn-retire" onclick="marquerRetire(${r.id})" ${r.statut==='retire'?'disabled':''}>
+        ${r.statut==='retire'?'Retiré':'✅ Marquer retiré'}
+      </button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+async function marquerRetire(id) {
+  const r = state.reservations.find(x => x.id === id);
+  if (r && r.statut !== 'retire') {
+    r.statut = 'retire';
+    await persist();
+    updateAdminStats();
+    renderReservations(filtreActuel);
+    renderDashboard();
+    showNotif('✅', `Ticket #${r.num} retiré !`, false);
+  }
+}
+
+// ===== NOTIFICATION =====
+function showNotif(icon, msg, err) {
+  const n = document.getElementById('notif');
+  document.getElementById('notifIcon').textContent = icon;
+  document.getElementById('notifMsg').textContent  = msg;
+  n.className = 'notif' + (err ? ' error' : '');
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 3500);
+}
+
+// ===== ACCÈS SECRET ADMIN (5 clics sur le logo) =====
+let lc = 0, lt = null;
+document.getElementById('logoArea').addEventListener('click', function() {
+  if (isAdmin) return;
+  lc++; clearTimeout(lt);
+  lt = setTimeout(() => lc = 0, 2000);
+  if (lc >= 5) {
+    lc = 0;
+    document.getElementById('modalAdminLogin').classList.add('active');
+    setTimeout(() => document.getElementById('adminPassword').focus(), 100);
+  }
+});
+
+// ===== INIT =====
+loadState();
+</script>
+</body>
+</html>
