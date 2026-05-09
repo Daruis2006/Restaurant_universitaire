@@ -1,0 +1,15 @@
+{
+  "name": "Restaurant ENS/FAST",
+  "short_name": "RestoU",
+  "start_url": "index.html",
+  "display": "standalone", 
+  "background_colour": "#1A1A2E",
+  "theme_colour": "#FF6B35",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.filation.com/512/1046/1046747.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
