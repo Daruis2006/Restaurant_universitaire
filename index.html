@@ -1011,5 +1011,10 @@ document.getElementById('logoArea').addEventListener('click', function() {
 // ===== INIT =====
 loadState();
 </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+  }
+</script>
 </body>
 </html>
